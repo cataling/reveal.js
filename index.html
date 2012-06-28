@@ -264,6 +264,9 @@ linkify( 'a' );
 		<script src="lib/classList.js"></script>
 		
 		<script src="js/reveal.js"></script>
+        <script src="http://localhost:8080/socket.io/socket.io.js"></script>
+        <script src="js/connection.js"></script>
+                
 		
 		<script>
 			// Parse the query string into a key/value object
@@ -305,7 +308,11 @@ linkify( 'a' );
 				theme: query.theme || 'default', // default/neon
 
 				// Transition style
-				transition: query.transition || 'default' // default/cube/page/concave/linear(2d)
+				transition: query.transition || 'default', // default/cube/page/concave/linear(2d)
+                
+                remoteControl: true, 
+                
+                remoteControlConfig: {p2pserver: 'http://localhost:8080', pairCode: '001', id: 'reveal_preso'}
 			});
 
 			hljs.initHighlightingOnLoad();

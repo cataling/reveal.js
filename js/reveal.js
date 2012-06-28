@@ -4,6 +4,7 @@
  * MIT licensed
  * 
  * Copyright (C) 2012 Hakim El Hattab, http://hakim.se
+ * Copyright (C) 2012 Adobe Systems Incorporated. All rights reserved.
  */
 var Reveal = (function(){
 	
@@ -18,7 +19,7 @@ var Reveal = (function(){
 
 		// Configurations options, can be overridden at initialization time 
 		config = {
-			controls: true,
+			controls: false,
 			progress: false,
 			history: false,
 			loop: false,
@@ -66,7 +67,11 @@ var Reveal = (function(){
 			startCount: 0,
 			handled: false,
 			threshold: 40
-		};
+		},
+            
+        remoteControl = false, 
+            
+        rcConnection = null;
 	
 	
 	/**
@@ -118,8 +123,48 @@ var Reveal = (function(){
 			window.addEventListener( 'orientationchange', removeAddressBar, false );
 		}
 		
+        if (options.remoteControl) {
+            initializeRemoteControl(options.remoteControlConfig);
+        }
 	}
 
+    function initializeRemoteControl(rcConfig) {
+        remoteControl = true;
+        rcConnection = new Connection(rcConfig.p2pserver, rcConfig.pairCode, rcConfig.id);
+        
+        rcConnection.addEventMessageListener(function(data) {
+            //console.log('Received event message from ' + data.from + ":" + JSON.stringify(data.payload));
+            handleRemoteCommand(data);
+        });
+        
+        rcConnection.connect();
+    }
+    
+    function handleRemoteCommand(data) {
+        if (data.payload.type == 'nav') {
+            var direction = data.payload.direction; 
+            //console.log("Received remote command to navigate in direction " + direction);
+            switch(direction) {
+                    case "right": {
+                        Reveal.navigateRight();
+                        break;
+                    }
+                    case "left": {
+                        Reveal.navigateLeft();
+                        break;
+                    }
+                    case "up": {
+                        Reveal.navigateUp();
+                        break;
+                    }
+                    case "down": {
+                        Reveal.navigateDown();
+                        break;
+                    }
+            }
+        }
+    }
+    
 	function configure() {
 		// Fall back on the 2D transform theme 'linear'
 		if( supports3DTransforms === false ) {
@@ -822,7 +867,7 @@ var Reveal = (function(){
 				verticalFragments[ verticalFragments.length - 1 ].classList.remove( 'visible' );
 
 				// Notify subscribers of the change
-				dispatchEvent( 'fragmenthidden', { fragment: verticalFragments[ verticalFragments.length - 1 ] } );
+				dispatchEvent( 'fragmenthidden', { fragment: verticalFragments[0] } );
 				return true;
 			}
 		}
@@ -833,7 +878,7 @@ var Reveal = (function(){
 				horizontalFragments[ horizontalFragments.length - 1 ].classList.remove( 'visible' );
 
 				// Notify subscribers of the change
-				dispatchEvent( 'fragmenthidden', { fragment: horizontalFragments[ horizontalFragments.length - 1 ] } );
+				dispatchEvent( 'fragmenthidden', { fragment: horizontalFragments[0] } );
 				return true;
 			}
 		}

@@ -2,3 +2,4 @@
 .svn
 log/*.log
 tmp/**
+p2p_emulator/node_modules
